@@ -22,7 +22,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.faizan_maan.taskiapp",
+      "package": "com.king_khan.taskiapp",
       "permissions": [
         "android.permission.SCHEDULE_EXACT_ALARM",
         "android.permission.USE_EXACT_ALARM",
@@ -37,7 +37,7 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "owner": "King-khan",
+    "owner": "king_khan",
     "extra": {
       "eas": {
         "projectId": "20f0c578-b1db-489f-857e-a2e1bc8cc59f"
