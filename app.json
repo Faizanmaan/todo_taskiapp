@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "TaskiApp",
-    "slug": "taski-app",
+    "slug": "todotaskiapp",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
