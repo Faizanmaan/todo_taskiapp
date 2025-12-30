@@ -41,25 +41,20 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
     useEffect(() => {
         if (visible) {
             setMode('date');
-            const dateToUse = initialDate || new Date();
-            setSelectedDate(initialDate || null);
-            setCurrentDate(dateToUse);
+            // Initialize time from initialDate or default to current time
+            const now = new Date();
+            const timeSource = initialDate || now;
+            let hours = timeSource.getHours();
+            const minutes = timeSource.getMinutes();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12; // the hour '0' should be '12'
+            setSelectedHour(hours);
+            setSelectedMinute(Math.ceil(minutes / 5) * 5 % 60); // Round to nearest 5 mins
+            setSelectedAmPm(ampm);
 
-            // Initialize time from initialDate or default to 9:00 AM
-            if (initialDate) {
-                let hours = initialDate.getHours();
-                const minutes = initialDate.getMinutes();
-                const ampm = hours >= 12 ? 'PM' : 'AM';
-                hours = hours % 12;
-                hours = hours ? hours : 12; // the hour '0' should be '12'
-                setSelectedHour(hours);
-                setSelectedMinute(minutes);
-                setSelectedAmPm(ampm);
-            } else {
-                setSelectedHour(9);
-                setSelectedMinute(0);
-                setSelectedAmPm('AM');
-            }
+            setSelectedDate(initialDate || now);
+            setCurrentDate(initialDate || now);
         }
     }, [visible, initialDate]);
 
@@ -83,6 +78,12 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
     const changeMonth = (increment: number) => {
         const newDate = new Date(currentDate);
         newDate.setMonth(newDate.getMonth() + increment);
+
+        // Prevent going to past months
+        const now = new Date();
+        const minDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        if (newDate < minDate) return;
+
         setCurrentDate(newDate);
     };
 
@@ -130,6 +131,12 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
             finalDate.setMinutes(selectedMinute);
             finalDate.setSeconds(0);
 
+            if (finalDate < new Date()) {
+                // If the time is in the past, adjust to current time + 1 min
+                const now = new Date();
+                finalDate.setTime(now.getTime() + 60000);
+            }
+
             onSelectDate(finalDate);
             onClose();
         }
@@ -148,7 +155,12 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
         }
 
         // Days of the month
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
         for (let i = 1; i <= daysInMonth; i++) {
+            const dayDate = new Date(year, month, i);
+            const isPast = dayDate < today;
             const isSelected = selectedDate &&
                 selectedDate.getDate() === i &&
                 selectedDate.getMonth() === month &&
@@ -157,9 +169,19 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
             days.push(
                 <TouchableOpacity
                     key={`day-${i}`}
-                    style={[styles.dayCell, isSelected && styles.selectedDayCell]}
-                    onPress={() => handleDayPress(i)}>
-                    <Text style={[styles.dayText, isSelected && styles.selectedDayText]}>
+                    style={[
+                        styles.dayCell,
+                        isSelected && styles.selectedDayCell,
+                        isPast && styles.disabledDayCell
+                    ]}
+                    onPress={() => !isPast && handleDayPress(i)}
+                    disabled={isPast}
+                >
+                    <Text style={[
+                        styles.dayText,
+                        isSelected && styles.selectedDayText,
+                        isPast && styles.disabledDayText
+                    ]}>
                         {i}
                     </Text>
                 </TouchableOpacity>
@@ -392,6 +414,12 @@ const styles = StyleSheet.create({
     selectedDayText: {
         color: '#fff',
         fontWeight: 'bold',
+    },
+    disabledDayCell: {
+        opacity: 0.3,
+    },
+    disabledDayText: {
+        color: COLORS.light.textSecondary,
     },
     selectedDateDisplay: {
         fontSize: 16,

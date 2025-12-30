@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '../../constants/theme';
+import { COLORS, SPACING, SHADOWS } from '../../constants/theme';
 import type { Task } from '../../store/taskSlice';
 
 interface TaskCardProps {
@@ -24,6 +24,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
     const menuButtonRef = useRef<React.ElementRef<typeof TouchableOpacity>>(null);
 
     const tagColor = task.tag === 'urgent' ? COLORS.light.urgent : COLORS.light.normal;
+    const isPastDue = task.remindAt && new Date(task.remindAt) < new Date() && !task.completed;
 
     const handleMenuPress = () => {
         menuButtonRef.current?.measureInWindow((px, py, width, height) => {
@@ -114,13 +115,25 @@ const TaskCard: React.FC<TaskCardProps> = ({
                     </Text>
                 ) : null}
 
-                {/* Tag */}
-                <View style={styles.tagContainer}>
+                {/* Tag & Complete Button */}
+                <View style={styles.footerContainer}>
                     <View style={[styles.tag, { backgroundColor: tagColor }]}>
                         <Text style={styles.tagText}>
                             {task.tag.charAt(0).toUpperCase() + task.tag.slice(1)}
                         </Text>
                     </View>
+
+                    {isPastDue && (
+                        <TouchableOpacity
+                            style={styles.completeButton}
+                            onPress={() => {
+                                onToggleComplete();
+                            }}
+                        >
+                            <Ionicons name="checkmark-circle-outline" size={16} color="#fff" style={{ marginRight: 4 }} />
+                            <Text style={styles.completeButtonText}>Complete</Text>
+                        </TouchableOpacity>
+                    )}
                 </View>
             </TouchableOpacity>
 
@@ -144,10 +157,14 @@ const TaskCard: React.FC<TaskCardProps> = ({
                             right: menuPosition.right + SPACING.md, // Add some margin from edge
                         }
                     ]}>
-                        <TouchableOpacity style={styles.menuItem} onPress={handleEdit}>
-                            <Text style={styles.menuText}>Edit Task</Text>
-                        </TouchableOpacity>
-                        <View style={styles.menuDivider} />
+                        {!task.completed && (
+                            <>
+                                <TouchableOpacity style={styles.menuItem} onPress={handleEdit}>
+                                    <Text style={styles.menuText}>Edit Task</Text>
+                                </TouchableOpacity>
+                                <View style={styles.menuDivider} />
+                            </>
+                        )}
                         <TouchableOpacity style={styles.menuItem} onPress={handleDelete}>
                             <Text style={[styles.menuText, styles.deleteText]}>Delete Task</Text>
                         </TouchableOpacity>
@@ -163,11 +180,14 @@ const styles = StyleSheet.create({
         marginBottom: SPACING.xs,
     },
     card: {
+
         padding: SPACING.lg,
         paddingBottom: SPACING.md,
+
+
     },
     cardCompleted: {
-        opacity: 0.6,
+        opacity: 0.5,
     },
     header: {
         flexDirection: 'row',
@@ -219,6 +239,25 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         color: '#fff',
     },
+    footerContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    completeButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: COLORS.light.primary,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 4,
+        ...SHADOWS.small,
+    },
+    completeButtonText: {
+        fontSize: 12,
+        fontWeight: 'bold',
+        color: '#fff',
+    },
     modalOverlay: {
         flex: 1,
         backgroundColor: 'transparent',
@@ -256,4 +295,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default TaskCard;
+export default React.memo(TaskCard);

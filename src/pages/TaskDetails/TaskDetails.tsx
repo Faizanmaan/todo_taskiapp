@@ -217,13 +217,15 @@ const TaskDetails = () => {
             </ScrollView>
 
             {mode === 'view' ? (
-                <View style={styles.footer}>
-                    <TouchableOpacity
-                        style={styles.saveButton}
-                        onPress={() => setMode('edit')}>
-                        <Text style={styles.saveButtonText}>Edit Task</Text>
-                    </TouchableOpacity>
-                </View>
+                !task?.completed && (
+                    <View style={styles.footer}>
+                        <TouchableOpacity
+                            style={styles.saveButton}
+                            onPress={() => setMode('edit')}>
+                            <Text style={styles.saveButtonText}>Edit Task</Text>
+                        </TouchableOpacity>
+                    </View>
+                )
             ) : (
                 <View style={styles.footer}>
                     <TouchableOpacity

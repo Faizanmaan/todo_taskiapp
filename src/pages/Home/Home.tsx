@@ -236,41 +236,31 @@ const Home: React.FC = () => {
                 data={sortedTasks}
                 keyExtractor={item => item.id}
                 renderItem={({ item }) => (
-                    <TouchableOpacity
-                        onPress={() => {
-                            if (selectionMode) {
-                                handleToggleTaskSelection(item.id);
-                            } else {
-                                handleViewTask(item);
-                            }
-                        }}
-                        activeOpacity={0.9}
-                    >
-                        <View style={styles.taskCardWrapper}>
-                            {selectionMode && (
-                                <TouchableOpacity
-                                    style={styles.checkbox}
-                                    onPress={() => handleToggleTaskSelection(item.id)}
-                                >
-                                    <Ionicons
-                                        name={selectedTasks.includes(item.id) ? "checkbox" : "square-outline"}
-                                        size={24}
-                                        color={selectedTasks.includes(item.id) ? COLORS.light.primary : COLORS.light.textSecondary}
-                                    />
-                                </TouchableOpacity>
-                            )}
-                            <View style={{ flex: 1 }}>
-                                <TaskCard
-                                    task={item}
-                                    onPress={() => selectionMode ? handleToggleTaskSelection(item.id) : handleViewTask(item)}
-                                    onEdit={() => handleEditTask(item)}
-                                    onToggleComplete={() => toggleComplete(item.id)}
-                                    onDelete={() => handleDeleteTask(item.id, item.title)}
+                    <View style={styles.taskCardWrapper}>
+                        {selectionMode && (
+                            <TouchableOpacity
+                                style={styles.checkbox}
+                                onPress={() => handleToggleTaskSelection(item.id)}
+                            >
+                                <Ionicons
+                                    name={selectedTasks.includes(item.id) ? "checkbox" : "square-outline"}
+                                    size={24}
+                                    color={selectedTasks.includes(item.id) ? COLORS.light.primary : COLORS.light.textSecondary}
                                 />
-                            </View>
+                            </TouchableOpacity>
+                        )}
+                        <View style={{ flex: 1 }}>
+                            <TaskCard
+                                task={item}
+                                onPress={() => selectionMode ? handleToggleTaskSelection(item.id) : handleViewTask(item)}
+                                onEdit={() => handleEditTask(item)}
+                                onToggleComplete={() => toggleComplete(item.id)}
+                                onDelete={() => handleDeleteTask(item.id, item.title)}
+                            />
                         </View>
-                    </TouchableOpacity>
+                    </View>
                 )}
+                extraData={tasks}
                 contentContainerStyle={styles.listContent}
                 ListEmptyComponent={!isLoading ? renderEmptyState : null}
                 refreshing={isLoading}

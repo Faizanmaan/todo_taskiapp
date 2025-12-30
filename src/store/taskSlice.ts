@@ -47,11 +47,11 @@ const taskSlice = createSlice({
     deleteTask: (state, action: PayloadAction<string>) => {
       state.tasks = state.tasks.filter(task => task.id !== action.payload);
     },
-    toggleComplete: (state, action: PayloadAction<string>) => {
-      const task = state.tasks.find(task => task.id === action.payload);
+    toggleComplete: (state, action: PayloadAction<{id: string; updatedAt: string}>) => {
+      const task = state.tasks.find(task => task.id === action.payload.id);
       if (task) {
         task.completed = !task.completed;
-        task.updatedAt = new Date();
+        task.updatedAt = new Date(action.payload.updatedAt);
       }
     },
     setLoading: (state, action: PayloadAction<boolean>) => {

@@ -66,10 +66,6 @@ export const useTasks = () => {
             userId: data.userId,
           };
 
-          if (task.remindAt && !task.completed) {
-            NotificationService.scheduleTaskNotification(task);
-          }
-
           return task;
         });
         dispatch(setTasks(tasksData));
@@ -183,26 +179,30 @@ export const useTasks = () => {
     if (!task) return;
 
     try {
+      const now = new Date();
+      // Optimistic update
+      dispatch(toggleCompleteAction({
+        id: taskId,
+        updatedAt: now.toISOString(),
+      }));
+
+      if (task.completed && task.remindAt) {
+        // If it was completed, and now we toggled it back to incomplete
+        NotificationService.scheduleTaskNotification({
+          ...task,
+          completed: false,
+        });
+      } else {
+        // If it was incomplete, and now we toggled it to complete
+        NotificationService.cancelTaskNotification(taskId);
+      }
+
       const db = firebaseFirestore();
       const taskRef = doc(db, 'tasks', taskId);
       await updateDoc(taskRef, {
         completed: !task.completed,
-        updatedAt: Timestamp.fromDate(new Date()),
+        updatedAt: Timestamp.fromDate(now),
       });
-
-      dispatch(toggleCompleteAction(taskId));
-
-      const updatedTask = tasks.find(t => t.id === taskId);
-      if (updatedTask) {
-        if (!updatedTask.completed && updatedTask.remindAt) {
-          NotificationService.scheduleTaskNotification({
-            ...updatedTask,
-            completed: !updatedTask.completed,
-          });
-        } else {
-          NotificationService.cancelTaskNotification(taskId);
-        }
-      }
     } catch (err: unknown) {
       console.error('Error toggling task:', err);
       dispatch(setError((err as Error).message));
