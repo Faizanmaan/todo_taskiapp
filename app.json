@@ -34,7 +34,16 @@
     },
     "plugins": [
       "expo-notifications",
-      "@react-native-firebase/app"
+      "@react-native-firebase/app",
+      "@react-native-google-signin/google-signin",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "minSdkVersion": 24
+          }
+        }
+      ]
     ],
     "web": {
       "favicon": "./assets/favicon.png"
