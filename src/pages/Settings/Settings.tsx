@@ -42,6 +42,8 @@ const Settings: React.FC = () => {
         navigation.navigate('ChangePassword');
     };
 
+    const isGoogleUser = user?.providerData.some(provider => provider.providerId === 'google.com');
+
     return (
         <SafeAreaView style={globalStyles.container}>
             <View style={styles.header}>
@@ -76,12 +78,14 @@ const Settings: React.FC = () => {
                     <Text style={styles.sectionHeaderText}>About</Text>
                 </View>
                 <View style={styles.menuContainer}>
-                    <TouchableOpacity style={styles.menuItem} onPress={handleChangePassword}>
-                        <Text style={styles.menuItemText}>Change Password</Text>
-                        <Ionicons name="chevron-forward" size={20} color="#B7B7B7" />
-                    </TouchableOpacity>
+                    {!isGoogleUser && (
+                        <TouchableOpacity style={styles.menuItem} onPress={handleChangePassword}>
+                            <Text style={styles.menuItemText}>Change Password</Text>
+                            <Ionicons name="chevron-forward" size={20} color="#B7B7B7" />
+                        </TouchableOpacity>
+                    )}
 
-                    <View style={styles.divider} />
+                    {!isGoogleUser && <View style={styles.divider} />}
 
                     <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
                         <Text style={[styles.menuItemText, styles.signOutText]}>Sign Out</Text>

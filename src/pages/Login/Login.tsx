@@ -8,6 +8,7 @@ import {
     Platform,
     ScrollView,
     TouchableOpacity,
+    Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
@@ -23,6 +24,9 @@ import Button from '../../components/Button/Button';
 import Input from '../../components/Input/Input';
 import { COLORS, SPACING, TYPOGRAPHY } from '../../constants/theme';
 import { globalStyles } from '../../styles/globalStyles';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { configureGoogleSignIn } from '../../config/googleSignin';
+import { GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
 import type { RootStackParamList } from '../../navigation/types';
 
 type LoginScreenRouteProp = RouteProp<RootStackParamList, 'Login'>;
@@ -38,6 +42,50 @@ const Login: React.FC = () => {
     const [isSignUp, setIsSignUp] = useState(route.params?.isSignUp ?? false);
     const [loading, setLoadingState] = useState(false);
     const [isTermsAccepted, setIsTermsAccepted] = useState(false);
+
+    React.useEffect(() => {
+        configureGoogleSignIn();
+    }, []);
+
+    const handleGoogleLogin = async () => {
+        try {
+            await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+            const signInResult = await GoogleSignin.signIn();
+
+            if (signInResult.type === 'success') {
+                const { idToken, user } = signInResult.data;
+                const googleCredential = GoogleAuthProvider.credential(idToken);
+
+                setLoadingState(true);
+                const userCredential = await signInWithCredential(firebaseAuth(), googleCredential);
+
+                // Check if user exists in Firestore, if not create
+                const userDocRef = doc(firebaseFirestore(), 'users', userCredential.user.uid);
+                const userDoc = await getDoc(userDocRef);
+
+                if (!userDoc.exists()) {
+                    await setDoc(userDocRef, {
+                        fullName: user.name,
+                        displayName: user.name,
+                        email: user.email,
+                        photoURL: user.photo,
+                        createdAt: Timestamp.fromDate(new Date()),
+                    });
+                }
+
+                dispatch(setUser(userCredential.user));
+            } else {
+                // sign in was cancelled by user
+                setLoadingState(false);
+            }
+
+        } catch (error: any) {
+            console.error('Google Sign-In Error:', error);
+            dispatch(setError(error.message));
+            Alert.alert('Error', 'Failed to sign in with Google');
+            setLoadingState(false);
+        }
+    };
 
     const handleEmailAuth = async () => {
         if (!email || !password) {
@@ -271,6 +319,20 @@ const Login: React.FC = () => {
                     style={styles.authButton}
                 />
 
+                <View style={styles.dividerContainer}>
+                    <View style={styles.dividerLine} />
+                    <Text style={styles.dividerText}>OR</Text>
+                    <View style={styles.dividerLine} />
+                </View>
+
+                <Button
+                    title="Continue with Google"
+                    onPress={handleGoogleLogin}
+                    variant="outline"
+                    style={styles.googleButton}
+                    icon={<Image source={require('../../assets/google_icon.png')} style={styles.googleIcon} />}
+                />
+
                 <View style={styles.footer}>
                     <Text style={styles.footerText}>
                         {isSignUp ? 'Already have Account? ' : 'Don’t have an account? '}
@@ -387,6 +449,32 @@ const styles = StyleSheet.create({
     },
     termsHighlight: {
         color: COLORS.light.primary,
+    },
+    dividerContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: SPACING.lg,
+        width: '100%',
+    },
+    dividerLine: {
+        flex: 1,
+        height: 1,
+        backgroundColor: COLORS.light.border,
+    },
+    dividerText: {
+        marginHorizontal: SPACING.md,
+        color: COLORS.light.textSecondary,
+        fontSize: TYPOGRAPHY.fontSize.sm,
+    },
+    googleButton: {
+        width: '100%',
+        borderColor: COLORS.light.border,
+        marginBottom: SPACING.lg,
+    },
+    googleIcon: {
+        width: 20,
+        height: 20,
+        marginRight: SPACING.sm,
     },
 });
 

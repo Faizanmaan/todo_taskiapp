@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "25460966938",
+    "project_id": "taski-app-786",
+    "storage_bucket": "taski-app-786.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:25460966938:android:15f47770e374a283f173a3",
+        "android_client_info": {
+          "package_name": "com.taskiapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "25460966938-m9v2v9n0b49ftsbmq453uvg65jpb135t.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDdaDg7W1e-IRkT-stnh0p4daNKgE4lKck"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "25460966938-m9v2v9n0b49ftsbmq453uvg65jpb135t.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
