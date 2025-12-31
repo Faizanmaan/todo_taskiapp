@@ -25,7 +25,7 @@ const Welcome: React.FC = () => {
     useEffect(() => {
         GoogleSignin.configure({
             webClientId: WEB_CLIENT_ID,
-            offlineAccess: true,
+            offlineAccess: false,
         });
     }, []);
 
